@@ -78,15 +78,15 @@ class SouthwestCheckInTask
       visit("https://southwest.com")
 
       logger.debug("Clicking Check-In Tab")
-      checkin_el = driver.find_element(id: "booking-form--check-in-tab")
+      checkin_el = driver.find_element(id: "TabbedArea_4-tab-4")
       checkin_el.click
 
       logger.debug("Fill out flight info")
 
-      confirmation_field = driver.find_element(id: "confirmationNumber")
-      fname_field = driver.find_element(id: "firstName")
-      lname_field = driver.find_element(id: "lastName")
-      submit = driver.find_element(id: "jb-button-check-in")
+      confirmation_field = driver.find_element(id: "LandingPageAirReservationForm_confirmationNumber_check-in")
+      fname_field = driver.find_element(id: "LandingPageAirReservationForm_passengerFirstName_check-in")
+      lname_field = driver.find_element(id: "LandingPageAirReservationForm_passengerLastName_check-in")
+      submit = driver.find_element(id: "LandingPageAirReservationForm_submit-button_check-in")
 
       confirmation_field.send_keys(confirmation)
       fname_field.send_keys(fname)
@@ -99,7 +99,7 @@ class SouthwestCheckInTask
 
       # There's no id for this button element, but for now it's the only
       # `submit-button` class on the page. Fingers crossed it stays that way.
-      submit = driver.find_element(:class, "submit-button")
+      submit = driver.find_element(:class, "form-mixin--submit-button")
       submit.click
 
       sleep 3.0
