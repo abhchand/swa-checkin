@@ -1,58 +1,12 @@
 #!/usr/bin/env ruby
 
-# Automates the check-in process for Southwest flights
-#
-# Uses a headless chrome browser powered by `chromedriver` and optionally emails
-# you a screenshot of the result (hopefully a successful check-in)
-#
-# === Dependencies
-#
-#   1. Ruby (heavily recommend installing Ruby with RVM: rvm.io)
-#
-#   2. `selenium-webdriver` ruby gem. Install with `gem install selenium-webdriver`
-#
-#   3. `chromedriver`
-#       Debian Linux: https://christopher.su/2015/selenium-chromedriver-ubuntu
-#       OSX: `brew install chromedriver`
-#
-#   4. `sendemail`
-#       Project: http://caspian.dotconf.net/menu/Software/SendEmail
-#       Debian Linux: `apt-get install sendmail-bin`
-#       OSX: `brew install sendemail`
-#
-# === Running
-#
-# The script requires your name and Southwest confirmation code to run.
-#
-#     SWA_CONFIRMATION="T9MUNA" SWA_NAME="Darth Vadar" path/to/swa.rb
-#
-# === Mailing the results
-#
-# You can optionally specify SMTP email information to have the results
-# emailed back to you (success or failure). Requires specifying all the
-# SWA_EMAIL_* configs
-#
-# NOTE: This step requires SMTP credentials which could be exposed in your
-# servers command history. It is recommended that you use a junkmail
-# account (e.g. Yahoo) as the sender and not your real account.
-#
-# - SMTP Server: Yahoo uses `smtp.mail.yahoo.com:587` and Gmail uses
-#   `smtp.gmail.com:587`
-# - Username: The full email used to log in. Will be the email sender.
-# - Password: Your email login password
-# - Recipients: Space separate list of recipients
-#
-#     SWA_CONFIRMATION="T9MUNA" \
-#       SWA_NAME="Darth Vadar" \
-#       SWA_EMAIL_SERVER="smtp.foo.com:587" \
-#       SWA_EMAIL_USER="from@example.com" \
-#       SWA_EMAIL_PASSWORD="blahBlah" \
-#       SWA_EMAIL_RECIPIENTS="person1@example.com person2@example.com" \
-#       path/to/swa.rb
-#
-# === Scheduling
-#
-#  You can use `cron` on any other scheduling utility to run this script
+#   _____  ___   __ __  ______  __ __  __    __    ___  _____ ______
+#  / ___/ /   \ |  |  ||      ||  |  ||  |__|  |  /  _]/ ___/|      |
+# (   \_ |     ||  |  ||      ||  |  ||  |  |  | /  [_(   \_ |      |
+#  \__  ||  O  ||  |  ||_|  |_||  _  ||  |  |  ||    _]\__  ||_|  |_|
+#  /  \ ||     ||  :  |  |  |  |  |  ||  `  '  ||   [_ /  \ |  |  |
+#  \    ||     ||     |  |  |  |  |  | \      / |     |\    |  |  |
+#   \___| \___/  \__,_|  |__|  |__|__|  \_/\_/  |_____| \___|  |__|
 
 require "dotenv/load"
 require "selenium-webdriver"
