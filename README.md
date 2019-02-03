@@ -4,15 +4,13 @@ Automate the Southwest Airlines Check-In process!
 
 Uses a headless chrome browser and optionally emails you a screenshot of the result (hopefully a successful check-in)
 
-- [Debian/Ubuntu Installation](#installation)
+- [Debian/Ubuntu Setup](#installation)
     - [Ruby](#installation-ruby)
     - [Chrome](#installation-chrome)
     - [Chromedriver](#installation-chromedriver)
+    - [Environment](#installation-environment)
 - [Run](#run)
-    - [Environment](#run-environment)
-    - [Command](#run-command)
 - [Schedule](#schedule)
-
 
 # <a name="installation"></a>Debian/Ubuntu Installation
 
@@ -74,9 +72,7 @@ sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver
 rm chromedriver_linux64.zip
 ```
 
-# <a name="run"></a>Run
-
-### <a name="run-environment"></a>Environment
+### <a name="installation-environment"></a>Environment
 
 The script relies on several Environment variables to exist. To make defining these easier, you can fill out the provided sample environment config file.
 
@@ -87,7 +83,7 @@ cp .env.sample .env
 vi .env
 ```
 
-### <a name="run-command"></a>Command
+# <a name="run"></a>Run
 
 To run the script:
 
