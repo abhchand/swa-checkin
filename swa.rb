@@ -17,7 +17,7 @@
 #
 #   4. `sendemail`
 #       Project: http://caspian.dotconf.net/menu/Software/SendEmail
-#       Debian Linux: `apt-get install libio-socket-ssl-perl libnet-ssleay-perl sendemail`
+#       Debian Linux: `apt-get install sendmail-bin`
 #       OSX: `brew install sendemail`
 #
 # === Running
@@ -270,3 +270,4 @@ class SouthwestCheckInTask
 end
 
 SouthwestCheckInTask.new.run!
+
