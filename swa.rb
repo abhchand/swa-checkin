@@ -54,6 +54,7 @@
 #
 #  You can use `cron` on any other scheduling utility to run this script
 
+require "dotenv/load"
 require "selenium-webdriver"
 require "shellwords"
 
