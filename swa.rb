@@ -56,7 +56,7 @@ class SouthwestCheckInTask
       submit = driver.find(id: "LandingPageAirReservationForm_submit-button_check-in")
       submit.click
 
-      raise "Southwest Application Error" if page_has_error?
+      raise "Southwest Application Error: #{@swa_error_message || 'unknown'}" if page_has_error?
 
       # There's no id for this button element, but for now it's the only
       # `submit-button` class on the page. Fingers crossed it stays that way.
@@ -184,8 +184,8 @@ class SouthwestCheckInTask
     # In several cases the Southwest website returns a page with an
     # error flash/div at the top. This occurs when the check in doesn't exist,
     # is too early, has already passed, etc...
-    driver.find(:css, ".message_error")
-    true
+    error = driver.find(:css, ".message_error")
+    @swa_error_message = error.text.split("\n").first.strip
   rescue Capybara::ElementNotFound => e
     false
   end
