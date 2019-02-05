@@ -20,6 +20,8 @@ ENV_FILE = (File.expand_path(File.dirname(__FILE__)) + "/.env").freeze
 Dotenv.load(ENV_FILE)
 
 class SouthwestCheckInTask
+  MAX_RETRIES = 3
+
   attr_accessor :logger, :driver, :config
 
   def initialize
@@ -29,8 +31,6 @@ class SouthwestCheckInTask
 
     check_for_chromedriver
     check_for_sendemail
-    setup_driver
-    setup_headless_window
   end
 
   def run!
@@ -154,25 +154,46 @@ class SouthwestCheckInTask
     driver.current_window.resize_to(width, height)
   end
 
-  # Executes a block and ensures the headless browser connection is closed
-  # before exiting.
-  def run_and_close_driver(&block)
-    logger.info("Starting execution")
-    yield
-    logger.info "Complete!"
-  rescue => e
-    logger.error e
-    logger.error e.backtrace
-  ensure
-    capture_page!
-    capture_screenshot!
-
+  def close_driver
     if driver
       logger.info("Closing driver...")
       driver.quit
     end
+  end
 
-    send_mail
+  def reset_driver
+    logger.info("Resetting driver...")
+    driver.reset!
+  end
+
+  # Executes a block and ensures the headless browser connection is closed
+  # before exiting.
+  def run_and_close_driver(&block)
+    attempt = 1
+
+    setup_driver
+    setup_headless_window
+
+    begin
+      logger.info("Starting execution (Attempt ##{attempt})")
+      yield
+      logger.info "Complete!"
+    rescue => e
+      logger.error e
+
+      attempt += 1
+      if attempt <= MAX_RETRIES
+        reset_driver
+        retry
+      end
+    ensure
+      capture_page!
+      capture_screenshot!
+
+      close_driver
+
+      send_mail
+    end
   end
 
   def visit(url, log: true)
