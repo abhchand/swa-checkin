@@ -22,7 +22,7 @@ Dotenv.load(ENV_FILE)
 class SouthwestCheckInTask
   MAX_RETRIES = 3
 
-  attr_accessor :logger, :driver, :config
+  attr_accessor :logger, :session, :config
 
   def initialize
     setup_logger
@@ -34,33 +34,33 @@ class SouthwestCheckInTask
   end
 
   def run!
-    run_and_close_driver do
+    run_and_close_session do
       logger.info("Visiting SWA website")
       visit("https://southwest.com")
 
       logger.debug("Clicking Check-In Tab")
-      checkin_el = driver.find(id: "TabbedArea_4-tab-4")
+      checkin_el = session.find(id: "TabbedArea_4-tab-4")
       checkin_el.click
 
       logger.debug("Fill out flight info")
 
-      confirmation_field = driver.find(id: "LandingPageAirReservationForm_confirmationNumber_check-in")
+      confirmation_field = session.find(id: "LandingPageAirReservationForm_confirmationNumber_check-in")
       confirmation_field.send_keys(confirmation)
 
-      fname_field = driver.find(id: "LandingPageAirReservationForm_passengerFirstName_check-in")
+      fname_field = session.find(id: "LandingPageAirReservationForm_passengerFirstName_check-in")
       fname_field.send_keys(fname)
 
-      lname_field = driver.find(id: "LandingPageAirReservationForm_passengerLastName_check-in")
+      lname_field = session.find(id: "LandingPageAirReservationForm_passengerLastName_check-in")
       lname_field.send_keys(lname)
 
-      submit = driver.find(id: "LandingPageAirReservationForm_submit-button_check-in")
+      submit = session.find(id: "LandingPageAirReservationForm_submit-button_check-in")
       submit.click
 
       raise "Southwest Application Error: #{@swa_error_message || 'unknown'}" if page_has_error?
 
       # There's no id for this button element, but for now it's the only
       # `submit-button` class on the page. Fingers crossed it stays that way.
-      submit = driver.find(:css, ".form-mixin--submit-button")
+      submit = session.find(:css, ".form-mixin--submit-button")
       submit.click
 
       sleep 3.0
@@ -142,39 +142,39 @@ class SouthwestCheckInTask
     @logger.info("Logging enabled")
   end
 
-  def setup_driver
-    logger.debug("Creating driver")
-    @driver = Capybara::Session.new(:selenium_chrome_headless)
+  def setup_session
+    logger.debug("Creating session")
+    @session = Capybara::Session.new(:selenium_chrome_headless)
   end
 
   def setup_headless_window
     width = 1600
     height = 1280
     logger.debug("Resizing window to #{width}x#{height}")
-    driver.current_window.resize_to(width, height)
+    session.current_window.resize_to(width, height)
   end
 
-  def close_driver
-    if driver
-      logger.info("Closing driver...")
-      driver.quit
+  def close_session
+    if session
+      logger.info("Closing session...")
+      session.quit
     end
   end
 
-  def reset_driver
-    logger.info("Resetting driver...")
-    driver.reset!
+  def reset_session
+    logger.info("Resetting session...")
+    close_session
   end
 
   # Executes a block and ensures the headless browser connection is closed
   # before exiting.
-  def run_and_close_driver(&block)
+  def run_and_close_session(&block)
     attempt = 1
 
-    setup_driver
-    setup_headless_window
-
     begin
+      setup_session
+      setup_headless_window
+
       logger.info("Starting execution (Attempt ##{attempt})")
       yield
       logger.info "Complete!"
@@ -183,14 +183,15 @@ class SouthwestCheckInTask
 
       attempt += 1
       if attempt <= MAX_RETRIES
-        reset_driver
+        sleep(attempt * 3)
+        close_session
         retry
       end
     ensure
       capture_page!
       capture_screenshot!
 
-      close_driver
+      close_session
 
       send_mail
     end
@@ -198,14 +199,14 @@ class SouthwestCheckInTask
 
   def visit(url, log: true)
     logger.debug("Visiting #{url}") if log
-    driver.visit(url)
+    session.visit(url)
   end
 
   def page_has_error?
     # In several cases the Southwest website returns a page with an
     # error flash/div at the top. This occurs when the check in doesn't exist,
     # is too early, has already passed, etc...
-    error = driver.find(:css, ".message_error")
+    error = session.find(:css, ".message_error")
     @swa_error_message = error.text.split("\n").first.strip
   rescue Capybara::ElementNotFound => e
     false
@@ -217,7 +218,7 @@ class SouthwestCheckInTask
     logger.debug "Capturing page... #{@html_filepath}"
     puts "Capturing page... #{@html_filepath}"
 
-    File.open(@html_filepath, "w") { |file| file.write(driver.body) }
+    File.open(@html_filepath, "w") { |file| file.write(session.body) }
   end
 
   def capture_screenshot!
@@ -226,7 +227,7 @@ class SouthwestCheckInTask
     logger.debug "Capturing screenshot... #{@screenshot_filename}"
     puts "Capturing screenshot... #{@screenshot_filename}"
 
-    driver.save_screenshot(@screenshot_filename) if driver
+    session.save_screenshot(@screenshot_filename) if session
   end
 
   def send_mail?
