@@ -34,6 +34,7 @@ class SouthwestCheckInTask
       logger.debug("Clicking Check-In Tab")
       checkin_el = driver.find_element(id: "TabbedArea_4-tab-4")
       checkin_el.click
+      wait_for_ajax
 
       logger.debug("Fill out flight info")
 
@@ -46,6 +47,7 @@ class SouthwestCheckInTask
       fname_field.send_keys(fname)
       lname_field.send_keys(lname)
       submit.click
+      wait_for_ajax
 
       sleep 3.0
 
@@ -55,6 +57,7 @@ class SouthwestCheckInTask
       # `submit-button` class on the page. Fingers crossed it stays that way.
       submit = driver.find_element(:class, "form-mixin--submit-button")
       submit.click
+      wait_for_ajax
 
       sleep 3.0
 
@@ -173,6 +176,7 @@ class SouthwestCheckInTask
   def visit(url, log: true)
     logger.debug("Visiting #{url}") if log
     driver.navigate.to(url)
+    wait_for_ajax
   end
 
   def page_has_error?
@@ -222,7 +226,17 @@ class SouthwestCheckInTask
   def escape(str)
     Shellwords.escape(str)
   end
+
+  def wait_for_ajax
+    max_time = Time.now + 10
+
+    while Time.now < max_time
+      finished = driver.execute_script('$.active').to_i == 0
+      break if finished
+      sleep 0.1
+    end
+    raise "wait_for_ajax timeout" unless finished
+  end
 end
 
 SouthwestCheckInTask.new.run!
-
