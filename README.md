@@ -95,8 +95,15 @@ To run the script:
 
 Of course, you'll probably want to schedule the script so you can have it run at a specific time and check in for you.
 
-If you're using `cron.d` you can easily schedule it as follows
+If you're using `cron` you can easily schedule it as follows.
 
 ```
-TBD
+# Be sure to replace `someuser` with your user and update the cron timing.
+00 00 00 00 * (env && /path/to/ruby /path/to/swa.rb) > /home/someuser/cron.log 2>&1
 ```
+
+Notes:
+
+- `cron` loads with no knowledge about your environment. See [this post](https://stackoverflow.com/a/23523156/2490003) on how to run ruby scripts in cron sessions. It was written with `rvm` in mind but can be adapted to `rbenv` and other toosl
+- The above crontab entry prints out the `env` and logs everything to a logfile as a useful debugging tool
+- In general, you may find it useful to [enable system wide cron logging](https://stackoverflow.com/a/34872041/2490003) as well.
