@@ -163,9 +163,8 @@ class SouthwestCheckInTask
   rescue => e
     logger.error e
     logger.error e.backtrace
-    logger.debug "Page Body:"
-    logger.debug driver.body
   ensure
+    capture_page!
     capture_screenshot!
 
     if driver
@@ -191,6 +190,15 @@ class SouthwestCheckInTask
     false
   end
 
+  def capture_page!
+    @html_filepath = "/tmp/swa-#{Time.now.utc.to_i}.html"
+
+    logger.debug "Capturing page... #{@html_filepath}"
+    puts "Capturing page... #{@html_filepath}"
+
+    File.open(@html_filepath, "w") { |file| file.write(driver.body) }
+  end
+
   def capture_screenshot!
     @screenshot_filename = "/tmp/screenshot-#{Time.now.utc.to_i}.png"
 
@@ -208,8 +216,7 @@ class SouthwestCheckInTask
     return unless send_mail?
 
     body = "This email was generated automatically by a bot\n" +
-      "Please see attached results\n\n" +
-      File.read(@logger_filepath)
+      "Please see attached results\n\n"
 
     cmd = [
       "sendemail",
@@ -221,7 +228,9 @@ class SouthwestCheckInTask
       "-s", email_server,
       "-xu", email_sender,
       "-xp", escape(email_password),
-      "-a", @screenshot_filename
+      "-a", @screenshot_filename,
+      "-a", @html_filepath,
+      "-a", @logger_filepath
     ].join(" ")
 
     logger.debug("sendemail command: '#{cmd}'")
