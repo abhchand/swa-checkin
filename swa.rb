@@ -13,6 +13,12 @@ require "capybara"
 require "shellwords"
 require "logger"
 
+# dotenv looks for an `.env` file in the current working directory, which
+# may not be the same directory this file is located in (e.g when running
+# with cron). Specify the fully qualified `.env` file path explicitly
+ENV_FILE = (File.expand_path(File.dirname(__FILE__)) + "/.env").freeze
+Dotenv.load(ENV_FILE)
+
 class SouthwestCheckInTask
   attr_accessor :logger, :driver, :config
 
