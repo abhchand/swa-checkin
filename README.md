@@ -91,6 +91,12 @@ To run the script:
 ./swa.rb
 ```
 
+For a full list of options:
+
+```
+./swa.rb --help
+```
+
 # <a name="schedule"></a>Schedule
 
 Of course, you'll probably want to schedule the script so you can have it run at a specific time and check in for you.
