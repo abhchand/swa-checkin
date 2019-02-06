@@ -2,6 +2,10 @@
 
 Automate the Southwest Airlines Check-In process!
 
+<p>
+  <img src="meta/screenshot.png" height="175" />
+</p>
+
 Uses a headless chrome browser and optionally emails you a screenshot of the result (hopefully a successful check-in)
 
 - [Debian/Ubuntu Setup](#installation)
