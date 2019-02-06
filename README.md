@@ -16,7 +16,7 @@ Uses a headless chrome browser and optionally emails you a screenshot of the res
 
 ### <a name="installation-ruby"></a>Ruby
 
-Install `ruby (2.5.1)` using your preferred installer/manager.
+Install `ruby (2.5.1)` using your preferred installer/manager. (I heavily recommend [RVM](http://rvm.io/))
 
 Then run
 
