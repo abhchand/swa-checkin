@@ -157,7 +157,7 @@ class SouthwestCheckInTask
   def close_session
     if session
       logger.info("Closing session...")
-      session.quit
+      session.driver.quit
     end
   end
 
