@@ -98,7 +98,7 @@ Of course, you'll probably want to schedule the script so you can have it run at
 If you're using `cron` you can easily schedule it as follows.
 
 ```
-# Be sure to replace `someuser` with your user and update the cron timing.
+# Be sure to replace `someuser`, the `/path/to/*`, and the cron timing.
 00 00 00 00 * (env && /path/to/ruby /path/to/swa.rb) > /home/someuser/cron.log 2>&1
 ```
 
