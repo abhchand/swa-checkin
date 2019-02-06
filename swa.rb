@@ -12,6 +12,7 @@ require "dotenv/load"
 require "capybara"
 require "shellwords"
 require "logger"
+require "optparse"
 
 # dotenv looks for an `.env` file in the current working directory, which
 # may not be the same directory this file is located in (e.g when running
@@ -24,8 +25,11 @@ class SouthwestCheckInTask
 
   attr_accessor :logger, :session, :config
 
-  def initialize
+  def initialize(options = {})
     @now = Time.now.to_i
+
+    @max_retries = (options[:max_retries] || MAX_RETRIES).to_i
+    raise "Invalid value for `--max-retries`" if @max_retries < 1
 
     setup_logger
 
@@ -177,13 +181,13 @@ class SouthwestCheckInTask
       setup_session
       setup_headless_window
 
-      logger.info("Starting execution (Attempt ##{@attempt})")
+      logger.info("Starting execution (Attempt #{@attempt} of #{@max_retries})")
       yield
       logger.info "Complete!"
     rescue => e
       logger.error e
 
-      if @attempt < MAX_RETRIES
+      if @attempt < @max_retries
         capture_page!
         capture_screenshot!
         sleep(@attempt * 3)
@@ -283,4 +287,26 @@ class SouthwestCheckInTask
   end
 end
 
-SouthwestCheckInTask.new.run!
+options = {}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "\nUsage: #{__FILE__} [options]"
+
+  options[:max_retries] = SouthwestCheckInTask::MAX_RETRIES
+  opts.on(
+    "-rMAX_RETRIES",
+    "--max-retries=MAX_RETRIES",
+    "Maximum number of times to retry "\
+      "(default: #{SouthwestCheckInTask::MAX_RETRIES})"
+  ) do |c|
+    options[:max_retries] = c
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end
+
+parser.parse!
+SouthwestCheckInTask.new(options).run!
