@@ -25,6 +25,8 @@ class SouthwestCheckInTask
   attr_accessor :logger, :session, :config
 
   def initialize
+    @now = Time.now.to_i
+
     setup_logger
 
     validate_environment
@@ -136,7 +138,7 @@ class SouthwestCheckInTask
   end
 
   def setup_logger
-    @logger_filepath = "/tmp/swa-#{Time.now.utc.to_i}.log"
+    @logger_filepath = "/tmp/swa-#{@now}.log"
     puts "Logging to #{@logger_filepath}"
     @logger = ::Logger.new(@logger_filepath)
     @logger.info("Logging enabled")
@@ -169,22 +171,24 @@ class SouthwestCheckInTask
   # Executes a block and ensures the headless browser connection is closed
   # before exiting.
   def run_and_close_session(&block)
-    attempt = 1
+    @attempt = 1
 
     begin
       setup_session
       setup_headless_window
 
-      logger.info("Starting execution (Attempt ##{attempt})")
+      logger.info("Starting execution (Attempt ##{@attempt})")
       yield
       logger.info "Complete!"
     rescue => e
       logger.error e
 
-      attempt += 1
-      if attempt <= MAX_RETRIES
-        sleep(attempt * 3)
+      if @attempt < MAX_RETRIES
+        capture_page!
+        capture_screenshot!
+        sleep(@attempt * 3)
         close_session
+        @attempt += 1
         retry
       end
     ensure
@@ -213,21 +217,27 @@ class SouthwestCheckInTask
   end
 
   def capture_page!
-    @html_filepath = "/tmp/swa-#{Time.now.utc.to_i}.html"
+    page = "/tmp/swa-#{@now}-#{@attempt}.html"
 
-    logger.debug "Capturing page... #{@html_filepath}"
-    puts "Capturing page... #{@html_filepath}"
+    logger.debug "Capturing page #{@attempt}... #{page}"
+    puts "Capturing page #{@attempt}... #{page}"
 
-    File.open(@html_filepath, "w") { |file| file.write(session.body) }
+    File.open(page, "w") { |file| file.write(session.body) }
+    @pages ||= []
+    @pages << page
   end
 
   def capture_screenshot!
-    @screenshot_filename = "/tmp/screenshot-#{Time.now.utc.to_i}.png"
+    screenshot = "/tmp/screenshot-#{@now}-#{@attempt}.png"
 
-    logger.debug "Capturing screenshot... #{@screenshot_filename}"
-    puts "Capturing screenshot... #{@screenshot_filename}"
+    logger.debug "Capturing screenshot #{@attempt}... #{screenshot}"
+    puts "Capturing screenshot #{@attempt}... #{screenshot}"
 
-    session.save_screenshot(@screenshot_filename) if session
+    if session
+      session.save_screenshot(screenshot)
+      @screenshots ||= []
+      @screenshots << screenshot
+    end
   end
 
   def send_mail?
@@ -238,6 +248,7 @@ class SouthwestCheckInTask
     return unless send_mail?
 
     body = "This email was generated automatically by a bot\n" +
+      "I attempted to check in #{@attempt} time(s)\n" +
       "Please see attached results\n\n"
 
     cmd = [
@@ -249,11 +260,15 @@ class SouthwestCheckInTask
       "-o", "tls=yes",
       "-s", email_server,
       "-xu", email_sender,
-      "-xp", escape(email_password),
-      "-a", @screenshot_filename,
-      "-a", @html_filepath,
-      "-a", @logger_filepath
-    ].join(" ")
+      "-xp", escape(email_password)
+    ]
+
+    (@screenshots + @pages + [@logger_filepath]).each do |attachment|
+      cmd << "-a"
+      cmd << attachment
+    end
+
+    cmd = cmd.join(" ")
 
     logger.debug("sendemail command: '#{cmd}'")
     `#{cmd}`
