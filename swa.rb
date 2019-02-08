@@ -108,9 +108,9 @@ class SouthwestCheckInTask
   def email_subject
     @email_subject ||=
       if @success
-        "Southwest Check In Completed for #{fname}"
+        "✔️ Southwest Check In Successful for #{fname}"
       else
-        "Southwest Check In Failed for #{fname}"
+        "❌ Southwest Check In Failed for #{fname}"
       end
   end
 
@@ -251,8 +251,8 @@ class SouthwestCheckInTask
   def send_mail
     return unless send_mail?
 
-    body = "This email was generated automatically by a bot\n" +
-      "I attempted to check in #{@attempt} time(s)\n" +
+    body = "Hello 👋🏾\n" +
+      "I attempted to check you in to your Southwest flight #{@attempt} time(s)\n" +
       "Please see attached results\n\n"
 
     cmd = [
