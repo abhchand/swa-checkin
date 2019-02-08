@@ -66,7 +66,7 @@ class SouthwestCheckInTask
 
       # There's no id for this button element, but for now it's the only
       # `submit-button` class on the page. Fingers crossed it stays that way.
-      submit = session.find(:css, ".form-mixin--submit-button")
+      submit = session.find(:css, ".submit-button")
       submit.click
 
       sleep 3.0
