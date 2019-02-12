@@ -108,9 +108,9 @@ class SouthwestCheckInTask
   def email_subject
     @email_subject ||=
       if @success
-        "✔️ Southwest Check In Successful for #{fname}"
+        "Southwest Check In Successful for #{fname}"
       else
-        "❌ Southwest Check In Failed for #{fname}"
+        "Southwest Check In Failed for #{fname}"
       end
   end
 
