@@ -52,7 +52,7 @@ rm google-chrome-stable_current_amd64.deb
 
 `chromedriver` is used to drive the headless browser.
 
-`chromedriver` versions are very specificly tied to Google Chrome versions. To determine the correct `chromedriver` version to install:
+`chromedriver` versions are very specifically tied to Google Chrome versions. To determine the correct `chromedriver` version to install:
 
 1. Check your version of Google Chrome with `google-chrome-stable --version`
 2. Scan [this unorganized list of chromedriver versions](http://chromedriver.storage.googleapis.com/). Find the closest possible version to the Google Chrome version without exceeding it.
