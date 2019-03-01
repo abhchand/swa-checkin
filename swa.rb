@@ -26,6 +26,7 @@ class SouthwestCheckInTask
   attr_accessor :logger, :session, :config
 
   def initialize(options = {})
+    @options = options
     @now = Time.now.to_i
 
     @max_retries = (options[:max_retries] || MAX_RETRIES).to_i
@@ -82,11 +83,11 @@ class SouthwestCheckInTask
   end
 
   def fname
-    @fname ||= ENV["SWA_NAME"]&.split(" ", 2)&.first
+    @fname ||= (@options[:name] || ENV["SWA_NAME"])&.split(" ", 2)&.first
   end
 
   def lname
-    @lname ||= ENV["SWA_NAME"]&.split(" ", 2)&.last
+    @lname ||= (@options[:name] || ENV["SWA_NAME"])&.split(" ", 2)&.last
   end
 
   def email_server
@@ -300,6 +301,22 @@ parser = OptionParser.new do |opts|
       "(default: #{SouthwestCheckInTask::MAX_RETRIES})"
   ) do |c|
     options[:max_retries] = c
+  end
+
+  opts.on(
+    "-nNAME",
+    "--name=NAME",
+    "Passenger full name (default: `ENV['SWA_NAME']`)"
+  ) do |c|
+    options[:name] = c
+  end
+
+  opts.on(
+    "-cCONFIRMATION",
+    "--confirmation=CONFIRMATION",
+    "SWA Confirmation Code (default: `ENV['SWA_CONFIRMATION']`)"
+  ) do |c|
+    options[:confirmation] = c
   end
 
   opts.on("-h", "--help", "Prints this help") do
